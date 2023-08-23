@@ -1,0 +1,72 @@
+---
+title: "Day 8 Activities"
+output: html_document
+date: "2023-08-23"
+---
+
+```{r}
+library(tidyverse)
+library(here)
+```
+
+## Day 8 Tasks
+
+1.  Data viz worst
+
+```{r}
+space_launches <- read_csv(here("data", "space_launches.csv"))
+
+space_launches <- space_launches %>% 
+  group_by(type) %>% 
+  mutate(type_count = n())
+
+space_launches_sub <- space_launches %>% 
+  filter(launch_year %in% c(2000:2005)
+         
+# create a data viz nightmare
+space_launches %>%
+  filter(launch_year %in% c(2000)) %>% 
+  ggplot(aes(x = type,
+             y = type_count)) +
+  geom_col(aes(color = agency)) +
+  scale_y_continuous("count of rockets", sec.axis = sec_axis(~ . / 100, name = "atmosphere(km)")) +
+  geom_hline(yintercept = 1700, linetype = "dotted", color = "red")
+  
+# ideas- flip x and y axis, add another y axis showing atmosphere and horizontal thresholds at where a rocket goes into orbit, make the color a gradient so it looks like they're blasting off  
+```
+
+2.  wrangling practice with the SF greenhouse gas data
+
+```{r}
+sf_emissions <- read_csv(here("data", "San_Francisco_Communitywide_Greenhouse_Gas_Inventory.csv"))
+
+# create a summary table of total annual greenhouse gas emissions by sector_general
+sf_emissions_sum <- sf_emissions %>% 
+  group_by(Sector_General) %>% 
+  summarize(total_emissions = sum(Emissions_mtCO2e))
+
+# create a summary table of total annual greenhouse gas emissions by year and commodity type
+sf_emissions_sum2 <- sf_emissions %>% 
+  group_by(Calendar_Year, Commodity_Type) %>% 
+  summarize(total_emissions = sum(Emissions_mtCO2e))
+
+# 3. create a subset of the data that only contains observations from 2005 on, 
+emissions_sub <- sf_emissions %>% 
+  select(Calendar_Year, Sector_Detail2, Emissions_mtCO2e) %>% 
+  filter(as.numeric(Calendar_Year) >= 2005) %>% 
+  filter(str_detect(Sector_Detail2, pattern = "PG&E"))
+```
+
+3.  do your data viz best
+
+```{r}
+emissions_sub_plot <- sf_emissions %>% 
+  filter(Calendar_Year == "1990",
+         Commodity_Type %in% c("Gasoline", "Diesel", "Electricity"))
+
+emissions_sub_plot %>% 
+  ggplot(aes(x = Sector_GPC_Detail,
+             y = Emissions_mtCO2e,
+             fill = Commodity_Type)) +
+  geom_col()
+```
